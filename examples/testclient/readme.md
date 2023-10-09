@@ -17,7 +17,7 @@ By default, the server listens on port 9092. You can change this by modifying th
 
 ### Client
 
-To run the client, use the `go run server.go` command:
+To run the client, use the `go run client.go` command:
 
 By default, the client connects to the server at `localhost:9092` and sends the audio data from the file `test.slin`. You can change these by modifying the `serverAddr` and `fileName` constants in `client.go`.
 
