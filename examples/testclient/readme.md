@@ -15,6 +15,8 @@ To run the server, use the `go run server.go` command:
 
 By default, the server listens on port 9092. You can change this by modifying the `listenAddr` constant in `server.go`.
 
+By default the server outputs received audio to STDOUT... so pipe this somewhere meaningful!
+
 ### Client
 
 To run the client, use the `go run client.go` command:
