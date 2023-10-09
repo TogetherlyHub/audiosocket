@@ -11,13 +11,13 @@ This repository contains an example of using AudioSocket to send audio data from
 
 ### Server
 
-To run the server, use the `go run` command:
+To run the server, use the `go run server.go` command:
 
 By default, the server listens on port 9092. You can change this by modifying the `listenAddr` constant in `server.go`.
 
 ### Client
 
-To run the client, use the `go run` command:
+To run the client, use the `go run server.go` command:
 
 By default, the client connects to the server at `localhost:9092` and sends the audio data from the file `test.slin`. You can change these by modifying the `serverAddr` and `fileName` constants in `client.go`.
 
