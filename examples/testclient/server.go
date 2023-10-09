@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"io"
+	"os"
 	"io/ioutil"
 	"log"
 	"net"
@@ -16,7 +17,7 @@ import (
 // MaxCallDuration is the maximum amount of time to allow a call to be up before it is terminated.
 const MaxCallDuration = 2 * time.Minute
 
-const listenAddr = ":8080"
+const listenAddr = ":9092"
 const languageCode = "en-US"
 
 // slinChunkSize is the number of bytes which should be sent per Slin
@@ -97,11 +98,10 @@ func Handle(pCtx context.Context, c net.Conn) {
 
 	go processDataFromAsterisk(ctx, cancel, c)
 
-	log.Println("sending audio")
-	if err = sendAudio(c, audioData); err != nil {
-		log.Println("failed to send audio to Asterisk:", err)
-	}
-	log.Println("completed audio send")
+	log.Println("listening for 60 seconds")
+	time.Sleep(60 * time.Second)
+
+	log.Println("completed listening")
 	return
 }
 
@@ -119,31 +119,38 @@ func getCallID(c net.Conn) (uuid.UUID, error) {
 }
 
 func processDataFromAsterisk(ctx context.Context, cancel context.CancelFunc, in io.Reader) {
-	var err error
-	var m audiosocket.Message
+    var err error
+    var m audiosocket.Message
 
-	defer cancel()
+    defer cancel()
 
-	for ctx.Err() == nil {
-		m, err = audiosocket.NextMessage(in)
-		if errors.Cause(err) == io.EOF {
-			log.Println("audiosocket closed")
-			return
-		}
-		switch m.Kind() {
-		case audiosocket.KindHangup:
-			log.Println("audiosocket received hangup command")
-			return
-		case audiosocket.KindError:
-			log.Println("error from audiosocket")
-		case audiosocket.KindSlin:
-			if m.ContentLength() < 1 {
-				log.Println("no audio data")
-			}
-		default:
-		}
-	}
+    for ctx.Err() == nil {
+        m, err = audiosocket.NextMessage(in)
+        if errors.Cause(err) == io.EOF {
+            log.Println("audiosocket closed")
+            return
+        }
+        switch m.Kind() {
+        case audiosocket.KindHangup:
+            log.Println("audiosocket received hangup command")
+            return
+        case audiosocket.KindError:
+            log.Println("error from audiosocket")
+        case audiosocket.KindSlin:
+            if m.ContentLength() < 1 {
+                log.Println("no audio data")
+            }
+
+            // Write the Audio Data to stdout
+            if _, err := os.Stdout.Write(m.Payload()); err != nil {
+                log.Println("failed to write to stdout:", err)
+            }
+
+        default:
+        }
+    }
 }
+
 
 func sendAudio(w io.Writer, data []byte) error {
 
